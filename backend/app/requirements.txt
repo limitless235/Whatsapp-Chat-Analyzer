@@ -2,7 +2,7 @@ fastapi==0.95.2
 uvicorn[standard]==0.22.0
 numpy==1.26.4
 pandas==2.2.2
-scikit-learn==1.2.2
+scikit-learn==1.4.2
 torch==2.0.1
 transformers==4.31.0
 sentence-transformers==2.2.2
@@ -12,7 +12,7 @@ plotly==5.15.0
 nltk==3.8.1
 better_profanity==0.7.0
 umap-learn==0.5.4
-nrclib==0.3.0
 wordcloud==1.8.2.2
 python-multipart==0.0.6
 pydantic==1.10.12
+nrclex
