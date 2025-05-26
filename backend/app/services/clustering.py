@@ -5,29 +5,28 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.cluster import KMeans
 import torch
 
-from ..utils.model_loader import load_transformer_model_and_tokenizer
+from ..utils.model_loader import get_transformer_model_and_tokenizer
+from ..utils.cleaning import clean_text  # Import text cleaning function
 
 class ClusteringService:
     def __init__(self, device: str = "cpu"):
         self.device = device
         
-        # Load MiniLM transformer model + tokenizer for embeddings (e.g. sentence-transformers/all-MiniLM-L6-v2)
+        # Model name
         self.model_name = "sentence-transformers/all-MiniLM-L6-v2"
-        self.tokenizer, self.model = None, None
-        self._load_embedding_model()
 
-        # Initialize TF-IDF vectorizer - can fit on input texts later
+        # Lazy load transformer model + tokenizer using model_loader.py
+        self.tokenizer, self.model = get_transformer_model_and_tokenizer(self.model_name)
+        self.model.to(self.device)
+        self.model.eval()
+
+        # TF-IDF vectorizer - fit on input texts later
         self.tfidf_vectorizer = TfidfVectorizer(stop_words='english', max_features=5000)
 
         self.kmeans_model = None
 
-    def _load_embedding_model(self):
-        self.tokenizer, self.model = load_transformer_model_and_tokenizer(self.model_name)
-        self.model.to(self.device)
-        self.model.eval()
-
     def embed_texts(self, texts: List[str], batch_size: int = 32) -> np.ndarray:
-        """Batch embed texts with transformer model."""
+        """Batch embed cleaned texts with transformer model."""
         embeddings = []
         for i in range(0, len(texts), batch_size):
             batch_texts = texts[i:i+batch_size]
@@ -36,7 +35,6 @@ class ClusteringService:
             
             with torch.no_grad():
                 outputs = self.model(**inputs)
-                # Assume model outputs embeddings in last_hidden_state, mean pooling
                 last_hidden_state = outputs.last_hidden_state  # (batch_size, seq_len, hidden_dim)
                 attention_mask = inputs['attention_mask'].unsqueeze(-1)
                 masked_embeddings = last_hidden_state * attention_mask
@@ -52,11 +50,14 @@ class ClusteringService:
         Fit KMeans clusters on combined TF-IDF + embedding features.
         Returns tuple of (cluster_labels, feature_vectors)
         """
-        # Step 1: Fit and transform TF-IDF on all texts
-        tfidf_features = self.tfidf_vectorizer.fit_transform(texts)  # sparse matrix
+        # Step 0: Clean all texts before feature extraction
+        cleaned_texts = [clean_text(t) for t in texts]
 
-        # Step 2: Embed all texts
-        embeddings = self.embed_texts(texts)  # numpy array
+        # Step 1: Fit and transform TF-IDF on cleaned texts
+        tfidf_features = self.tfidf_vectorizer.fit_transform(cleaned_texts)  # sparse matrix
+
+        # Step 2: Embed all cleaned texts
+        embeddings = self.embed_texts(cleaned_texts)  # numpy array
 
         # Step 3: Combine TF-IDF (dense) and embeddings
         combined_features = np.hstack([tfidf_features.toarray(), embeddings])
@@ -74,8 +75,11 @@ class ClusteringService:
         if self.kmeans_model is None:
             raise RuntimeError("KMeans model not fitted yet. Call fit_clusters() first.")
 
-        tfidf_features = self.tfidf_vectorizer.transform(texts)
-        embeddings = self.embed_texts(texts)
+        # Clean texts before prediction
+        cleaned_texts = [clean_text(t) for t in texts]
+
+        tfidf_features = self.tfidf_vectorizer.transform(cleaned_texts)
+        embeddings = self.embed_texts(cleaned_texts)
 
         combined_features = np.hstack([tfidf_features.toarray(), embeddings])
 

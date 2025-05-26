@@ -8,6 +8,7 @@ import torch
 import numpy as np
 
 from ..utils.model_loader import load_transformer_model_and_tokenizer
+from ..utils.cleaning import clean_text   # <-- Added import here
 
 log = logging.getLogger(__name__)
 
@@ -36,7 +37,8 @@ def vader_sentiment_batch(texts: List[str]) -> List[Dict[str, Union[str, float]]
     """
     results = []
     for text in texts:
-        scores = vader_analyzer.polarity_scores(text)
+        cleaned_text = clean_text(text)  # <-- Clean text here before VADER analysis
+        scores = vader_analyzer.polarity_scores(cleaned_text)
         compound = scores['compound']
 
         if compound >= 0.05:
@@ -61,7 +63,10 @@ def roberta_sentiment_batch(texts: List[str]) -> List[Dict]:
     load_roberta()
 
     device = next(roberta_model.parameters()).device
-    inputs = roberta_tokenizer(texts, padding=True, truncation=True, return_tensors="pt", max_length=512)
+    # Clean all texts before tokenizing
+    cleaned_texts = [clean_text(text) for text in texts]  # <-- Clean texts here
+
+    inputs = roberta_tokenizer(cleaned_texts, padding=True, truncation=True, return_tensors="pt", max_length=512)
     inputs = {k: v.to(device) for k, v in inputs.items()}
 
     with torch.no_grad():

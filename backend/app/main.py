@@ -1,7 +1,9 @@
-# app/main.py
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from routers import analyze
+from app.routers import analyze    # <-- add 'app.' prefix here
+import logging
+logging.basicConfig(level=logging.INFO)
+
 
 app = FastAPI(
     title="WhatsApp Chat Analyzer",
@@ -9,7 +11,6 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# Allow frontend on localhost:3000 or deployed origin
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],  # For development; restrict in production
@@ -18,5 +19,4 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Register routes
 app.include_router(analyze.router, prefix="/api")
