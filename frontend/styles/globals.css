@@ -1,0 +1,110 @@
+/* globals.css */
+
+/* Import Tailwind base styles */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom global styles */
+html,
+body {
+  @apply bg-gray-50 text-gray-900 font-sans antialiased;
+  scroll-behavior: smooth;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  transition-property: background-color, color, border-color, fill, stroke, opacity, box-shadow, transform;
+  transition-duration: 250ms;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+a {
+  @apply text-indigo-600 hover:text-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-400;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  @apply font-semibold text-gray-800;
+  line-height: 1.25;
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+}
+
+p {
+  margin-bottom: 1rem;
+}
+
+button {
+  @apply bg-indigo-600 text-white font-medium rounded-md py-2 px-4 shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500;
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 200ms ease-in-out;
+}
+
+input,
+textarea,
+select {
+  @apply border border-gray-300 rounded-md py-2 px-3 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none;
+  font-family: inherit;
+  font-size: 1rem;
+  transition: border-color 200ms ease-in-out, box-shadow 200ms ease-in-out;
+}
+
+code {
+  @apply bg-gray-100 rounded px-1.5 py-0.5 font-mono text-sm text-indigo-600;
+}
+
+pre {
+  @apply bg-gray-900 text-gray-100 p-4 rounded-md overflow-x-auto font-mono text-sm;
+}
+
+/* Scrollbar styling for modern look */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-indigo-400 rounded;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-gray-200;
+}
+
+/* Responsive container */
+.container {
+  @apply mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl;
+}
+
+/* Utility to center content vertically and horizontally */
+.flex-center {
+  @apply flex items-center justify-center;
+}
+
+/* Card style */
+.card {
+  @apply bg-white rounded-lg shadow-md p-6;
+  transition: box-shadow 0.3s ease;
+}
+
+.card:hover {
+  @apply shadow-lg;
+}
+
+/* Smooth focus outlines */
+:focus-visible {
+  outline: 2px solid #6366F1; /* indigo-500 */
+  outline-offset: 2px;
+}
+
+/* Button group spacing */
+.btn-group > * + * {
+  @apply ml-2;
+}

@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "target": "es6",                        // Modern JavaScript target
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,                       // Allow JS files to be compiled
+    "skipLibCheck": true,                  // Skip type checking of declaration files for speed
+    "strict": true,                       // Enable all strict type-checking options
+    "forceConsistentCasingInFileNames": true,
+    "noEmit": true,                       // Don't emit compiled files (Next.js handles this)
+    "esModuleInterop": true,              // Fixes your React import error
+    "module": "esnext",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "incremental": true,
+    "baseUrl": ".",                      // Base directory for imports
+    "paths": {
+      "@/*": ["./*"]                     // Optional: path alias
+    }
+  },
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
+  "typeRoots": ["./types", "./node_modules/@types"],
+  "exclude": ["node_modules"]
+}

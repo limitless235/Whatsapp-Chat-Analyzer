@@ -1,0 +1,23 @@
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  reactStrictMode: true,          // Helps catch potential React issues
+  swcMinify: true,                // Faster minification with SWC
+  images: {
+    domains: ['yourdomain.com'],  // Add image domains here if you use remote images
+  },
+  env: {
+    // Example environment variables accessible via process.env
+    NEXT_PUBLIC_API_BASE_URL: process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000',
+  },
+  experimental: {
+    appDir: false,                // You can enable this if you plan to use the new app directory in Next.js 13+
+  },
+  // Optional: customize webpack if needed
+  webpack(config) {
+    // For example, aliasing
+    config.resolve.alias['@'] = require('path').resolve(__dirname);
+    return config;
+  },
+};
+
+module.exports = nextConfig;

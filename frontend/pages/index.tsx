@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import FileUpload from "../components/FileUpload";
-import UserDropdown from "../components/UserDropdown";
+import UserDropdown from "@/components/UserDropdown";
 import SentimentChart from "../components/SentimentChart";
 import EmotionChart from "../components/EmotionChart";
 import ToxicityChart from "../components/ToxicityChart";
@@ -11,18 +11,17 @@ import RadarPersonality from "../components/RadarPersonality";
 import HeatmapChart from "../components/HeatmapChart";
 import EmojiUsageChart from "../components/EmojiUsageChart";
 import SummaryCards from "../components/SummaryCards";
-
 import axios from "../utils/api";
 
 type AnalysisResult = {
   users: string[];
-  sentiment: any;
-  emotion: any;
-  toxicity: any;
+  sentiment: Record<string, any>;
+  emotion: Record<string, any>;
+  toxicity: Record<string, any>;
   umapClusters: any;
-  personality: any;
-  heatmaps: any;
-  emojiUsage: any;
+  personality: Record<string, any>;
+  heatmaps: Record<string, any>;
+  emojiUsage: Record<string, any>;
   summary: {
     totalMessages: number;
     activeDays: number;
@@ -33,9 +32,7 @@ type AnalysisResult = {
 export default function Home() {
   const [file, setFile] = useState<File | null>(null);
   const [selectedUser, setSelectedUser] = useState<string | null>(null);
-  const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(
-    null
-  );
+  const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -56,19 +53,15 @@ export default function Home() {
     try {
       const formData = new FormData();
       formData.append("file", file);
-
       const response = await axios.post("/analyze", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
       setAnalysisResult(response.data);
-      // Automatically select first user
-      if (response.data.users && response.data.users.length > 0) {
+      if (response.data.users.length > 0) {
         setSelectedUser(response.data.users[0]);
       }
     } catch (err: any) {
-      setError(
-        err.response?.data?.detail || "Failed to analyze file. Please try again."
-      );
+      setError(err.response?.data?.detail || "Failed to analyze file.");
     } finally {
       setLoading(false);
     }
@@ -90,9 +83,7 @@ export default function Home() {
         {loading ? "Analyzing..." : "Analyze Chat"}
       </button>
 
-      {error && (
-        <p className="mt-4 text-red-600 font-semibold text-center">{error}</p>
-      )}
+      {error && <p className="mt-4 text-red-600 text-center">{error}</p>}
 
       {analysisResult && (
         <>
@@ -110,9 +101,18 @@ export default function Home() {
               <EmotionChart data={analysisResult.emotion[selectedUser]} />
               <ToxicityChart data={analysisResult.toxicity[selectedUser]} />
               <UMAPCluster data={analysisResult.umapClusters} />
-              <RadarPersonality data={analysisResult.personality[selectedUser]} />
-              <HeatmapChart data={analysisResult.heatmaps[selectedUser]} />
-              <EmojiUsageChart data={analysisResult.emojiUsage[selectedUser]} />
+              <RadarPersonality
+                user={selectedUser}
+                data={analysisResult.personality[selectedUser]}
+              />
+              <HeatmapChart
+                user={selectedUser}
+                zData={analysisResult.heatmaps[selectedUser]}
+              />
+              <EmojiUsageChart
+                user={selectedUser}
+                emojiData={analysisResult.emojiUsage[selectedUser]}
+              />
             </>
           )}
         </>
