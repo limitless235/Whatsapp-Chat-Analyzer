@@ -1,0 +1,122 @@
+"use client";
+
+import React, { useState } from "react";
+import FileUpload from "../components/FileUpload";
+import UserDropdown from "../components/UserDropdown";
+import SentimentChart from "../components/SentimentChart";
+import EmotionChart from "../components/EmotionChart";
+import ToxicityChart from "../components/ToxicityChart";
+import UMAPCluster from "../components/UMAPCluster";
+import RadarPersonality from "../components/RadarPersonality";
+import HeatmapChart from "../components/HeatmapChart";
+import EmojiUsageChart from "../components/EmojiUsageChart";
+import SummaryCards from "../components/SummaryCards";
+
+import axios from "../utils/api";
+
+type AnalysisResult = {
+  users: string[];
+  sentiment: any;
+  emotion: any;
+  toxicity: any;
+  umapClusters: any;
+  personality: any;
+  heatmaps: any;
+  emojiUsage: any;
+  summary: {
+    totalMessages: number;
+    activeDays: number;
+    averageSentiment: number;
+  };
+};
+
+export default function Home() {
+  const [file, setFile] = useState<File | null>(null);
+  const [selectedUser, setSelectedUser] = useState<string | null>(null);
+  const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(
+    null
+  );
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleFileChange = (file: File) => {
+    setFile(file);
+    setSelectedUser(null);
+    setAnalysisResult(null);
+    setError(null);
+  };
+
+  const handleAnalyze = async () => {
+    if (!file) {
+      setError("Please upload a chat file before analyzing.");
+      return;
+    }
+    setLoading(true);
+    setError(null);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const response = await axios.post("/analyze", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      setAnalysisResult(response.data);
+      // Automatically select first user
+      if (response.data.users && response.data.users.length > 0) {
+        setSelectedUser(response.data.users[0]);
+      }
+    } catch (err: any) {
+      setError(
+        err.response?.data?.detail || "Failed to analyze file. Please try again."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <main className="max-w-7xl mx-auto p-4">
+      <h1 className="text-3xl font-bold mb-4 text-center">
+        WhatsApp Chat Analyzer
+      </h1>
+
+      <FileUpload onFileSelect={handleFileChange} />
+
+      <button
+        onClick={handleAnalyze}
+        disabled={loading || !file}
+        className="mt-4 px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
+      >
+        {loading ? "Analyzing..." : "Analyze Chat"}
+      </button>
+
+      {error && (
+        <p className="mt-4 text-red-600 font-semibold text-center">{error}</p>
+      )}
+
+      {analysisResult && (
+        <>
+          <UserDropdown
+            users={analysisResult.users}
+            selectedUser={selectedUser}
+            onChange={setSelectedUser}
+          />
+
+          <SummaryCards {...analysisResult.summary} />
+
+          {selectedUser && (
+            <>
+              <SentimentChart data={analysisResult.sentiment[selectedUser]} />
+              <EmotionChart data={analysisResult.emotion[selectedUser]} />
+              <ToxicityChart data={analysisResult.toxicity[selectedUser]} />
+              <UMAPCluster data={analysisResult.umapClusters} />
+              <RadarPersonality data={analysisResult.personality[selectedUser]} />
+              <HeatmapChart data={analysisResult.heatmaps[selectedUser]} />
+              <EmojiUsageChart data={analysisResult.emojiUsage[selectedUser]} />
+            </>
+          )}
+        </>
+      )}
+    </main>
+  );
+}
