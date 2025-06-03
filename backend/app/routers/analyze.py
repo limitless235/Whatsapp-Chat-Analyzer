@@ -2,10 +2,10 @@ import logging
 from typing import Union, IO, Any
 from fastapi import APIRouter, UploadFile, File
 from fastapi.responses import JSONResponse
-
 import pandas as pd
 import numpy as np
 import datetime
+from fastapi.encoders import jsonable_encoder  # ✅
 
 from app.services import (
     file_parser,
@@ -25,6 +25,7 @@ from ..utils import cleaning
 log = logging.getLogger(__name__)
 router = APIRouter()
 
+
 class ChatAnalyzer:
     def __init__(self, profanities_csv_path: Union[str, IO]):
         self.profanity_analyzer = profanity.ProfanityAnalyzer(profanities_csv_path)
@@ -34,7 +35,7 @@ class ChatAnalyzer:
         df = file_parser.parse_from_string(chat_str)
         log.info(f"Parsed {len(df)} messages.")
 
-        # ✅ Rename columns to match expected format
+        # ✅ Standardize expected column names
         df = df.rename(columns={"message": "text", "date_time": "date"})
 
         df['clean_text'] = df['text'].apply(cleaning.clean_text)
@@ -69,6 +70,9 @@ class ChatAnalyzer:
         log.info("Generating personality profiles...")
         personality_result = personality.generate_profiles(df)
 
+        # ✅ Explicitly extract user list for frontend
+        user_list = list(personality_result.keys())
+
         analysis_results = {
             "sentiment": sentiment_result,
             "emotions": emotion_result,
@@ -79,15 +83,14 @@ class ChatAnalyzer:
             "stats": stats_result,
             "wordclouds": wordcloud_result,
             "personality": personality_result,
+            "users": user_list,  # ✅ Add this
         }
 
         log.info("Chat analysis complete.")
         return self._make_json_serializable(analysis_results)
 
     def _make_json_serializable(self, obj: Any) -> Any:
-        """
-        Recursively convert DataFrames and other non-serializable types into JSON-safe structures.
-        """
+        """ Recursively convert DataFrames and other non-serializable types into JSON-safe structures. """
         if isinstance(obj, pd.DataFrame):
             return obj.to_dict(orient="records")
         elif isinstance(obj, (pd.Series, pd.Index)):
@@ -104,13 +107,11 @@ class ChatAnalyzer:
             return obj
 
 
-# Create a global ChatAnalyzer instance
+# ✅ Create analyzer instance with path to profanities.csv
 from pathlib import Path
-
 csv_path = Path(__file__).resolve().parent.parent / "data" / "profanities.csv"
 chat_analyzer = ChatAnalyzer(profanities_csv_path=csv_path)
 
-from fastapi.encoders import jsonable_encoder  # ✅ ADD THIS
 
 @router.post("/analyze")
 async def analyze_endpoint(file: UploadFile = File(...)):
@@ -119,11 +120,10 @@ async def analyze_endpoint(file: UploadFile = File(...)):
         chat_text = contents.decode("utf-8")
         result = chat_analyzer.analyze(chat_text)
 
-        # ✅ Use FastAPI's encoder to avoid all JSON serialization errors
+        # ✅ Use FastAPI’s encoder to ensure JSON serialization
         json_safe_result = jsonable_encoder(result)
-
         return JSONResponse(content=json_safe_result)
+
     except Exception as e:
         log.error(f"Error analyzing chat: {e}")
         return JSONResponse(status_code=500, content={"error": str(e)})
- 
