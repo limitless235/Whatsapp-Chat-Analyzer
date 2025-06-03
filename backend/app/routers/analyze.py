@@ -77,6 +77,9 @@ class ChatAnalyzer:
         from app.services import emoji_usage
 
         emoji_data = emoji_usage.emojiUsage(df)
+        from app.services.stats import get_basic_summary
+        summary = get_basic_summary(df)
+
 
 
         # ✅ Explicitly extract user list for frontend
@@ -95,6 +98,7 @@ class ChatAnalyzer:
             "personality": personality_result,
             "emojiUsage": emoji_data,
             "users": user_list,  # ✅ Add this
+            "summary": summary,
             "users": df["sender_name"].dropna().unique().tolist(),
         }
 

@@ -95,3 +95,15 @@ def compute_stats(df: pd.DataFrame) -> Dict[str, Any]:
         "common_words": service.most_common_words(messages),
         "length_distribution": service.message_length_distribution(messages)
     }
+# app/services/stats.py
+
+def get_basic_summary(df: pd.DataFrame) -> dict:
+    total_messages = len(df)
+    active_days = df['date'].dt.date.nunique()
+    total_users = df['sender_name'].nunique()
+
+    return {
+        "totalMessages": total_messages,
+        "activeDays": active_days,
+        "totalUsers": total_users,
+    }
