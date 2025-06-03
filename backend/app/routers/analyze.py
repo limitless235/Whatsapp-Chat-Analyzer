@@ -19,6 +19,7 @@ from app.services import (
     stats,
     wordclouds,
     personality,
+    toxicity
 )
 from ..utils import cleaning
 
@@ -70,12 +71,21 @@ class ChatAnalyzer:
         log.info("Generating personality profiles...")
         personality_result = personality.generate_profiles(df)
 
+        log.info("Running toxicity detection...")
+        toxicity_result = toxicity.toxicity_result(df)
+
+        from app.services import emoji_usage
+
+        emoji_data = emoji_usage.emojiUsage(df)
+
+
         # ✅ Explicitly extract user list for frontend
         user_list = list(personality_result.keys())
 
         analysis_results = {
             "sentiment": sentiment_result,
             "emotion": emotion_result,
+            "toxicity": toxicity_result,  # ✅ ADD THIS
             "clustering": clustering_result,
             "umap": umap_result,
             "interaction_graph": graph_result,
@@ -83,7 +93,9 @@ class ChatAnalyzer:
             "stats": stats_result,
             "wordclouds": wordcloud_result,
             "personality": personality_result,
+            "emojiUsage": emoji_data,
             "users": user_list,  # ✅ Add this
+            "users": df["sender_name"].dropna().unique().tolist(),
         }
 
         log.info("Chat analysis complete.")

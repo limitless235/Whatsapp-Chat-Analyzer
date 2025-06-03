@@ -16,4 +16,5 @@ wordcloud
 python-multipart==0.0.6
 pydantic==1.10.12
 nrclex
-vaderSentiment
+vaderSentiment==3.3.2
+emoji
