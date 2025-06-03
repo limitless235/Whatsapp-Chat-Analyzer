@@ -6,9 +6,16 @@ from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 from transformers import AutoModelForSequenceClassification, AutoTokenizer
 import torch
 import numpy as np
+import nltk
+import pandas as pd
+
+try:
+    nltk.data.find("sentiment/vader_lexicon")
+except LookupError:
+    nltk.download("vader_lexicon")
 
 from ..utils.model_loader import load_transformer_model_and_tokenizer
-from ..utils.cleaning import clean_text   # <-- Added import here
+from ..utils.cleaning import clean_text
 
 log = logging.getLogger(__name__)
 
@@ -37,7 +44,7 @@ def vader_sentiment_batch(texts: List[str]) -> List[Dict[str, Union[str, float]]
     """
     results = []
     for text in texts:
-        cleaned_text = clean_text(text)  # <-- Clean text here before VADER analysis
+        cleaned_text = clean_text(text)
         scores = vader_analyzer.polarity_scores(cleaned_text)
         compound = scores['compound']
 
@@ -63,8 +70,7 @@ def roberta_sentiment_batch(texts: List[str]) -> List[Dict]:
     load_roberta()
 
     device = next(roberta_model.parameters()).device
-    # Clean all texts before tokenizing
-    cleaned_texts = [clean_text(text) for text in texts]  # <-- Clean texts here
+    cleaned_texts = [clean_text(message) for text in texts]
 
     inputs = roberta_tokenizer(cleaned_texts, padding=True, truncation=True, return_tensors="pt", max_length=512)
     inputs = {k: v.to(device) for k, v in inputs.items()}
@@ -107,3 +113,36 @@ def combined_sentiment(texts: List[str]) -> List[Dict]:
         })
 
     return combined
+
+def get_sentiment_over_time(df: pd.DataFrame, date_col: str = "date", text_col: str = "text", model: str = "vader") -> pd.DataFrame:
+    """
+    Compute sentiment over time (grouped by date) using VADER or RoBERTa.
+    Returns a DataFrame with sentiment values aggregated per date.
+    """
+    # Validate required columns exist
+    missing_cols = [col for col in [text_col, date_col] if col not in df.columns]
+    if missing_cols:
+        raise ValueError(f"Missing required column(s) in DataFrame: {missing_cols}")
+
+    # Extract text column
+    texts = df[text_col].fillna("").astype(str).tolist()
+
+    # Convert and validate date column
+    df[date_col] = pd.to_datetime(df[date_col], errors="coerce")
+    df = df.dropna(subset=[date_col])
+    df["date_only"] = df[date_col].dt.date
+
+    if model == "vader":
+        vader_results = vader_sentiment_batch(texts)
+        df["compound"] = [res["compound"] for res in vader_results]
+        return df.groupby("date_only")["compound"].mean().reset_index(name="avg_compound")
+
+    elif model == "roberta":
+        roberta_results = roberta_sentiment_batch(texts)
+        df["positive"] = [res["confidence_scores"]["positive"] for res in roberta_results]
+        df["neutral"] = [res["confidence_scores"]["neutral"] for res in roberta_results]
+        df["negative"] = [res["confidence_scores"]["negative"] for res in roberta_results]
+        return df.groupby("date_only")[["positive", "neutral", "negative"]].mean().reset_index()
+
+    else:
+        raise ValueError(f"Unsupported model type: {model}")

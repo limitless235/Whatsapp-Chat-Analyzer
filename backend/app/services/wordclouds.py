@@ -54,3 +54,14 @@ class WordCloudService:
         encoded = base64.b64encode(image_stream.read()).decode("utf-8")
 
         return f"data:image/png;base64,{encoded}"
+def generate_wordclouds(df: pd.DataFrame) -> Dict[str, Any]:
+    """
+    Top-level wrapper to generate word cloud image and frequencies.
+    Expects a cleaned DataFrame and returns a dictionary.
+    """
+    messages = df.to_dict(orient="records")
+    service = WordCloudService()
+    return {
+        "frequencies": service.get_word_frequencies(messages),
+        "image_base64": service.generate_wordcloud_base64(messages)
+    }

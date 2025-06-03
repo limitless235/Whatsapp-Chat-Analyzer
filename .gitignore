@@ -1,3 +1,6 @@
 workflow.txt
 .venv
 node_modules
+.next
+venv
+__pycache__/

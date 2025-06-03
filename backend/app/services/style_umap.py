@@ -72,3 +72,7 @@ class StyleUMAP:
         embeddings = self.embed_texts(texts)
         combined_features = np.hstack([tfidf.toarray(), embeddings])
         return self.umap_model.transform(combined_features)
+def generate_umap_projection(texts: List[str], device: str = "cpu") -> np.ndarray:
+        reducer = StyleUMAP(device=device)
+        return reducer.reduce(texts)
+

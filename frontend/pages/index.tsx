@@ -1,17 +1,19 @@
 "use client";
 
 import React, { useState } from "react";
+import dynamic from "next/dynamic";
 import FileUpload from "../components/FileUpload";
 import UserDropdown from "@/components/UserDropdown";
-import SentimentChart from "../components/SentimentChart";
-import EmotionChart from "../components/EmotionChart";
-import ToxicityChart from "../components/ToxicityChart";
-import UMAPCluster from "../components/UMAPCluster";
-import RadarPersonality from "../components/RadarPersonality";
-import HeatmapChart from "../components/HeatmapChart";
-import EmojiUsageChart from "../components/EmojiUsageChart";
-import SummaryCards from "../components/SummaryCards";
 import axios from "../utils/api";
+
+const SentimentChart = dynamic(() => import("../components/SentimentChart"), { ssr: false });
+const EmotionChart = dynamic(() => import("../components/EmotionChart"), { ssr: false });
+const ToxicityChart = dynamic(() => import("../components/ToxicityChart"), { ssr: false });
+const UMAPCluster = dynamic(() => import("../components/UMAPCluster"), { ssr: false });
+const RadarPersonality = dynamic(() => import("../components/RadarPersonality"), { ssr: false });
+const HeatmapChart = dynamic(() => import("../components/HeatmapChart"), { ssr: false });
+const EmojiUsageChart = dynamic(() => import("../components/EmojiUsageChart"), { ssr: false });
+const SummaryCards = dynamic(() => import("../components/SummaryCards"), { ssr: false });
 
 type AnalysisResult = {
   users: string[];
@@ -69,9 +71,7 @@ export default function Home() {
 
   return (
     <main className="max-w-7xl mx-auto p-4">
-      <h1 className="text-3xl font-bold mb-4 text-center">
-        WhatsApp Chat Analyzer
-      </h1>
+      <h1 className="text-3xl font-bold mb-4 text-center">WhatsApp Chat Analyzer</h1>
 
       <FileUpload onFileSelect={handleFileChange} />
 

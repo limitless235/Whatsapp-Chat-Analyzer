@@ -104,3 +104,9 @@ class GraphAnalysisService:
             "nodes": nodes,
             "links": links
         }
+def generate_interaction_graph(df) -> Dict[str, Any]:
+    service = GraphAnalysisService()
+    messages = df.to_dict(orient="records")
+    service.build_interaction_graph(messages)
+    return service.to_dict()
+

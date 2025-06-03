@@ -1,10 +1,11 @@
 from typing import List, Dict
 import torch
 import torch.nn.functional as F
+import pandas as pd
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 from nrclex import NRCLex
 
-from ..utils.model_loader import get_transformer_model_and_tokenizer
+from ..utils.model_loader import load_transformer_model_and_tokenizer
 from ..utils.cleaning import clean_text
 
 class EmotionAnalyzer:
@@ -14,7 +15,7 @@ class EmotionAnalyzer:
         
         # Use lazy loader for model/tokenizer
         model_name = "cardiffnlp/twitter-roberta-base-emotion"
-        self.tokenizer, self.model = get_transformer_model_and_tokenizer(model_name)
+        self.tokenizer, self.model = load_transformer_model_and_tokenizer(model_name, classification=True)
         self.model.to(self.device)
         self.model.eval()
         
@@ -58,3 +59,26 @@ class EmotionAnalyzer:
         for nrc, rob in zip(nrclex_results, roberta_results):
             combined.append({"nrclex": nrc, "roberta": rob})
         return combined
+
+
+# ✅ Add this to fix the missing function error
+def get_emotion_over_time(df: pd.DataFrame, device: str = "cpu", batch_size: int = 32) -> dict:
+    """
+    Run emotion analysis and compute per-user emotion distribution.
+    Returns a dict of structure: {username: {emotion: average_score}}
+    """
+    analyzer = EmotionAnalyzer(device=device, batch_size=batch_size)
+    emotion_scores = analyzer.analyze_roberta_batch(df["text"].tolist())
+    
+    df = df.copy()
+    df["sender"] = df["sender_name"]
+    df["emotion_scores"] = emotion_scores
+
+    # Flatten emotion scores to columns
+    emotion_df = pd.json_normalize(df["emotion_scores"])
+    emotion_df["sender"] = df["sender"]
+
+    # Group by sender and take mean of each emotion score
+    grouped = emotion_df.groupby("sender").mean(numeric_only=True)
+
+    return grouped.to_dict(orient="index")

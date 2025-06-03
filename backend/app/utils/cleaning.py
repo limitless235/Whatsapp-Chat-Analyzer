@@ -41,10 +41,15 @@ class ChatCleaner:
 
     def clean_chat_df(self, chat_df: pd.DataFrame) -> pd.DataFrame:
         if self.remove_system_messages:
-            is_system = chat_df['text'].apply(self.filter_system_message)
+            is_system = chat_df['message'].apply(self.filter_system_message)
             chat_df = chat_df.loc[~is_system].copy()
 
-        chat_df['text'] = chat_df['text'].apply(self.clean_message)
-        chat_df = chat_df[chat_df['text'].str.strip() != ''].copy()
+        chat_df['message'] = chat_df['message'].apply(self.clean_message)
+        chat_df = chat_df[chat_df['message'].str.strip() != ''].copy()
 
         return chat_df
+cleaner = ChatCleaner()
+
+def clean_text(text: str) -> str:
+    return cleaner.clean_message(text)
+

@@ -36,7 +36,7 @@ def load_transformer_model_and_tokenizer(model_name: str,
         if classification:
             model = AutoModelForSequenceClassification.from_pretrained(model_name)
         else:
-            model = AutoModel.from_pretrained(model_name)
+            model = AutoModel.from_pretrained(model_name)  # ✅ CORRECTED HERE
         _model_cache[model_name] = model
         _tokenizer_cache[model_name] = tokenizer
         log.info(f"Loaded model & tokenizer: {model_name}")

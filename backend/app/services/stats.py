@@ -15,8 +15,8 @@ class StatsService:
         Convert messages to DataFrame and parse timestamp.
         """
         df = pd.DataFrame(messages)
-        df["timestamp"] = pd.to_datetime(df["timestamp"], errors="coerce")
-        df.dropna(subset=["timestamp"], inplace=True)
+        df["date"] = pd.to_datetime(df["date"], errors="coerce")
+        df.dropna(subset=["date"], inplace=True)
         df["text"] = df["text"].fillna("")
         return df
 
@@ -46,7 +46,7 @@ class StatsService:
         df = self._parse_dataframe(messages)
         df["word_count"] = df["text"].str.split().map(len)
 
-        grouped = df.groupby("sender").agg(
+        grouped = df.groupby("sender_name").agg(
             total_messages=("text", "count"),
             total_words=("word_count", "sum"),
             avg_words_per_message=("word_count", "mean")
@@ -81,3 +81,17 @@ class StatsService:
             "bin_edges": bins.tolist(),
             "frequencies": counts.tolist()
         }
+def compute_stats(df: pd.DataFrame) -> Dict[str, Any]:
+    """
+    Top-level wrapper for computing chat statistics.
+    Expects a DataFrame, converts to dict format for service class.
+    """
+    messages = df.to_dict(orient="records")
+    service = StatsService()
+
+    return {
+        "basic": service.compute_basic_stats(messages),
+        "per_user": service.per_user_stats(messages),
+        "common_words": service.most_common_words(messages),
+        "length_distribution": service.message_length_distribution(messages)
+    }

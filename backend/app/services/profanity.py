@@ -86,3 +86,17 @@ class ProfanityAnalyzer:
         }).rename(columns={'text': 'total_messages', 'is_profane': 'profanities_detected'})
 
         return chat_df, user_summary
+
+    def contains_profanity(self, text: str) -> bool:
+        """
+        Check if the text contains any profane words.
+        """
+        text_lower = text.lower()
+        return any(word in text_lower for word in self.custom_profanities)
+
+    def count_profanities(self, text: str) -> int:
+        """
+        Count how many profane words are present in the text.
+        """
+        text_lower = text.lower()
+        return sum(word in text_lower for word in self.custom_profanities)
