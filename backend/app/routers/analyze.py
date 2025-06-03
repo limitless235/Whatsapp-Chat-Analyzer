@@ -75,7 +75,7 @@ class ChatAnalyzer:
 
         analysis_results = {
             "sentiment": sentiment_result,
-            "emotions": emotion_result,
+            "emotion": emotion_result,
             "clustering": clustering_result,
             "umap": umap_result,
             "interaction_graph": graph_result,
