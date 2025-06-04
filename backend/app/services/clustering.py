@@ -17,7 +17,7 @@ class ClusteringService:
         self.model_name = "sentence-transformers/all-MiniLM-L6-v2"
 
         # Load model and tokenizer
-        self.tokenizer, self.model = load_transformer_model_and_tokenizer(self.model_name)
+        self.model, self.tokenizer = load_transformer_model_and_tokenizer(self.model_name)
         self.model.to(self.device)
         self.model.eval()
 

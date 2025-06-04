@@ -80,6 +80,15 @@ class ChatAnalyzer:
         from app.services.stats import get_basic_summary
         summary = get_basic_summary(df)
 
+        from app.services.sentiment import combined_sentiment
+        vader_scores = [res["vader"]["compound"] for res in combined_sentiment("message") if "vader" in res and "compound" in res["vader"]]
+        average_sentiment = round(sum(vader_scores) / len(vader_scores), 4) if vader_scores else 0.0
+        summary = get_basic_summary(df)
+        summary["averageSentiment"] = average_sentiment
+
+
+
+
 
 
         # ✅ Explicitly extract user list for frontend

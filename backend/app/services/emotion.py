@@ -13,13 +13,13 @@ class EmotionAnalyzer:
         self.device = device
         self.batch_size = batch_size
         
-        # Use lazy loader for model/tokenizer
         model_name = "cardiffnlp/twitter-roberta-base-emotion"
-        self.tokenizer, self.model = load_transformer_model_and_tokenizer(model_name, classification=True)
+        self.model, self.tokenizer = load_transformer_model_and_tokenizer(model_name, classification=True)
         self.model.to(self.device)
         self.model.eval()
         
         self.emotion_labels = ['anger', 'joy', 'optimism', 'sadness']
+
 
     def analyze_nrclex(self, texts: List[str]) -> List[Dict[str, int]]:
         """Analyze emotions lexicon-based for each text (NRCLex)."""

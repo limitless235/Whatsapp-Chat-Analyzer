@@ -15,14 +15,14 @@ def load_transformer_model_and_tokenizer(model_name: str,
                                          device: str = None):
     """
     Load a transformer model and tokenizer with caching.
-    
+
     Args:
         model_name (str): HuggingFace model name.
         classification (bool): If True, loads AutoModelForSequenceClassification else AutoModel.
         device (str): Device to place model on ('cpu' or 'cuda'). Default auto.
 
     Returns:
-        tokenizer, model
+        model, tokenizer
     """
     global _model_cache, _tokenizer_cache
 
@@ -36,7 +36,7 @@ def load_transformer_model_and_tokenizer(model_name: str,
         if classification:
             model = AutoModelForSequenceClassification.from_pretrained(model_name)
         else:
-            model = AutoModel.from_pretrained(model_name)  # ✅ CORRECTED HERE
+            model = AutoModel.from_pretrained(model_name)
         _model_cache[model_name] = model
         _tokenizer_cache[model_name] = tokenizer
         log.info(f"Loaded model & tokenizer: {model_name}")
@@ -46,4 +46,4 @@ def load_transformer_model_and_tokenizer(model_name: str,
 
     model.to(device)
     model.eval()
-    return tokenizer, model
+    return model, tokenizer  # ✅ RETURN ORDER: model first, then tokenizer

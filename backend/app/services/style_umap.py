@@ -20,7 +20,7 @@ class StyleUMAP:
         self.umap_model = None
 
     def _load_embedding_model(self):
-        self.tokenizer, self.model = load_transformer_model_and_tokenizer(self.model_name)
+        self.model, self.tokenizer = load_transformer_model_and_tokenizer(self.model_name)
         self.model.to(self.device)
         self.model.eval()
 
