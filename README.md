@@ -7,6 +7,12 @@ Just pure, local analysis and visualizations.
 
 ---
 
+| Quiz UI | Score page after completion of quiz along with explanations to questions |
+|---------|--------------------------------------------------------------------------|
+| ![Screenshot 1](<images/WhatsApp Image 2026-02-21 at 11.15.27.jpeg>) | ![Screenshot 2](<images/WhatsApp Image 2026-02-21 at 11.15.44.jpeg>) |
+
+---
+
 ## Overview
 
 WhatsApp Chat Analyzer is a privacy-first analytics dashboard for `.txt` chat exports from WhatsApp.
