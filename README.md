@@ -7,9 +7,9 @@ Just pure, local analysis and visualizations.
 
 ---
 
-| Quiz UI | Score page after completion of quiz along with explanations to questions |
+| Upload Screen | Analysis Page |
 |---------|--------------------------------------------------------------------------|
-| ![Screenshot 1](<images/WhatsApp Image 2026-02-21 at 11.15.27.jpeg>) | ![Screenshot 2](<images/WhatsApp Image 2026-02-21 at 11.15.44.jpeg>) |
+| ![Screenshot 1](<images/WhatsApp Image 2026-03-02 at 21.21.33.jpeg>) | ![Screenshot 2](<images/WhatsApp Image 2026-03-02 at 21.21.07.jpeg>) |
 
 ---
 
