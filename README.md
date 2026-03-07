@@ -204,11 +204,10 @@ No network requests. No external processing.
 ## Local Development
 
 ```bash
-git clone https://github.com/limitless235/whatsapp-chat-analyzer.git
-cd whatsapp-chat-analyzer
+git clone https://github.com/limitless235/Whatsapp-Chat-Analysis.git
+cd Whatsapp-Chat-Analysis
 npm install
-npm run dev
-```
+npm run dev```
 
 Open:
 
