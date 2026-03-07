@@ -207,7 +207,8 @@ No network requests. No external processing.
 git clone https://github.com/limitless235/Whatsapp-Chat-Analysis.git
 cd Whatsapp-Chat-Analysis
 npm install
-npm run dev```
+npm run dev
+```
 
 Open:
 
